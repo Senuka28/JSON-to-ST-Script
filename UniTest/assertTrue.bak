@@ -1,0 +1,12 @@
+FUNCTION assertTrue : BOOL
+VAR_INPUT
+	condition : BOOL; (*Variable to test*)
+END_VAR
+
+VAR
+
+END_VAR
+    (*https://github.com/tkucic/UniTest/blob/main/docs/docs/ns/UniTest/fc/assertTrue.md*)
+    assertTrue := condition;
+    RETURN;
+END_FUNCTION

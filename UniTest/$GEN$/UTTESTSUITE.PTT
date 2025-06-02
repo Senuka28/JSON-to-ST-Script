@@ -1,0 +1,21 @@
+FUNCTION_BLOCK utTestSuite 
+
+
+ VAR_INPUT
+  Id : UINT ;
+  Name : STRING [ 250 ] ;
+  RunTests : BOOL ;
+  ResetTests : BOOL ;
+  END_VAR 
+
+ VAR_OUTPUT
+  Summary : utTestCaseSummary ;
+  END_VAR 
+
+ VAR_IN_OUT
+  TestCases : ARRAY [ 0 .. 20 ] OF utTestCase ;
+  END_VAR 
+
+
+
+END_FUNCTION_BLOCK

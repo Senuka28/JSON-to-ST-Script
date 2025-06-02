@@ -1,0 +1,15 @@
+[PROTOTYP_PROG]
+COUNT=0
+[PROTOTYP_FB]
+COUNT=2
+FILE1=\$GEN$\utTestReporter
+FILE0=\$GEN$\utTestSuite
+[PROTOTYP_FKT]
+COUNT=1
+FILE0=\$GEN$\assertTrue
+[LIBRARY]
+COUNT=1
+FILE0=\LIB\sfclib\sfclib.GEN
+[EXECUTABLE]
+COUNT=1
+FILE0=\$ENV$\Resource\Resource

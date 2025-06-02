@@ -1,0 +1,21 @@
+FUNCTION_BLOCK utTestReporter 
+
+
+ VAR_INPUT
+  Size : UINT ;
+  Results : ARRAY [ 0 .. 65535 ] OF utTestCaseSummary ;
+  END_VAR 
+
+ VAR_OUTPUT
+  NrPousUnderTest : UINT ;
+  NrOfTests : UINT ;
+  NrTestsPassed : UINT ;
+  NrTestsFailed : UINT ;
+  PassRate : REAL ;
+  TestsInProgress : BOOL ;
+  Error : BOOL ;
+  END_VAR 
+
+
+
+END_FUNCTION_BLOCK

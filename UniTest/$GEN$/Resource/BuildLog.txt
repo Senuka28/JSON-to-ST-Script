@@ -1,0 +1,11 @@
+
+Building resource C:\BASE8\UniTest\$ENV$\Resource\Resource.MAK.
+Executing Pre-Build-Steps:
+Delete C:\BASE8\UNITEST\$GEN$\Resource\ASSERTTRUE.INC
+Delete C:\BASE8\UNITEST\$GEN$\Resource\BuildLog.txt
+Delete C:\BASE8\UNITEST\$GEN$\Resource\UNITEST.INC
+Delete C:\BASE8\UNITEST\$GEN$\Resource\UTTESTREPORTER.INC
+Delete C:\BASE8\UNITEST\$GEN$\Resource\UTTESTSUITE.INC
+No task(s) defined in resource Resource.
+Total:
+0 error(s) 0 warning(s)

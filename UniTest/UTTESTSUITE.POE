@@ -1,0 +1,325 @@
+FUNCTION_BLOCK utTestSuite
+VAR_EXTERNAL
+
+END_VAR
+
+VAR_INPUT
+	Id : UINT; (*Id of the test object. Must be unique number*)
+	Name : STRING[250]; (*Name of the test object*)
+	RunTests : BOOL; (*Starts all tests that are in setup state. Sets state to running.*)
+	ResetTests : BOOL; (*Sets state to setup on test cases that are ut_PASSED or ut_FAILED.*)
+END_VAR
+
+VAR_OUTPUT
+	Summary : utTestCaseSummary; (*Summary of the test results*)
+END_VAR
+
+VAR_IN_OUT
+	TestCases : ARRAY[0..20] OF utTestCase; (*Array of test case definition*)
+END_VAR
+
+VAR
+	i : UINT; (*Iterator variable*)
+	runCmd : R_TRIG; (*Trigger to prevent constant run commands*)
+	resetCmd : R_TRIG; (*Trigger to prevent constant reset commands*)
+END_VAR
+
+(*Automatically declared*)
+VAR_EXTERNAL
+END_VAR
+(** {*https://github.com/tkucic/UniTest/blob/main/docs/docs/ns/UniTest/fb/utTestSuite.md*} **)
+(**     {*Copy name of object under test*} **)
+(**     Summary.Id := Id; **)
+	(* assign - Stmt *)
+	LD Id
+	ST Summary.Id
+
+(**     Summary.Name := Name; **)
+	(* assign - Stmt *)
+	LD Name
+	ST Summary.Name
+
+(**  **)
+(**     {*Handle commands to start*} **)
+(**     runCmd(CLK:=RunTests); **)
+	(* call - Stmt *)
+	CAL runCmd (
+		CLK := RunTests
+	)
+
+(**     resetCmd(CLK:=ResetTests); **)
+	(* call - Stmt *)
+	CAL resetCmd (
+		CLK := ResetTests
+	)
+
+(**  **)
+(**     {*Calculate total number of tests and other flags*} **)
+(**     Summary.TotalTests := 0; **)
+	(* assign - Stmt *)
+	LD 0
+	ST Summary.TotalTests
+
+(**     Summary.TestsPassed := 0; **)
+	(* assign - Stmt *)
+	LD 0
+	ST Summary.TestsPassed
+
+(**     Summary.TestsFailed := 0;  **)
+	(* assign - Stmt *)
+	LD 0
+	ST Summary.TestsFailed
+
+(**     Summary.TestsRunning := FALSE; **)
+	(* assign - Stmt *)
+	LD FALSE
+	ST Summary.TestsRunning
+
+(**     FOR i:=0 TO 20 DO **)
+	(* for - Init *)
+	LD 0
+	ST i
+	EQ 20
+	JMPC ODK_FOR_STMTS_000000000000001
+
+	(* for - Cond *)
+	ODK_FOR_000000000000001:
+
+	LD 0
+	GT 20
+	JMPC ODK_FOR_DOWN_000000000000001
+
+	LD 0
+	GT 1
+	JMPC ODK_END_FOR_000000000000001
+
+	LD 20
+	LT i
+	JMPC ODK_END_FOR_000000000000001
+	JMP ODK_FOR_STMTS_000000000000001
+
+	ODK_FOR_DOWN_000000000000001:
+
+	LD 20
+	GT i
+	JMPC ODK_END_FOR_000000000000001
+
+	LD 0
+	LT 1
+	JMPC ODK_END_FOR_000000000000001
+
+		(* for - Stmts *)
+		ODK_FOR_STMTS_000000000000001:
+
+(**     	IF TestCases[i].id > 0 THEN **)
+		(* if - Cond *)
+		LD TestCases[i].Id
+		GT 0
+		JMPCN ODK_SKIP_000000000000002_000000000000001
+
+			(* then - Stmts *)
+
+(**     		Summary.TotalTests := Summary.TotalTests + 1; **)
+			(* assign - Stmt *)
+			LD Summary.TotalTests
+			ADD 1
+			ST Summary.TotalTests
+
+			JMP ODK_END_IF_000000000000002
+
+(**     	END_IF; **)
+		(* if - End *) 
+		ODK_SKIP_000000000000002_000000000000001:
+		ODK_END_IF_000000000000002:
+
+(**     	{*Start the test if the Run command is true, the test exists and it is in setup state*} **)
+(**     	IF TestCases[i].id > 0 AND TestCases[i].state = ut_SETUP AND runCmd.Q THEN **)
+		(* if - Cond *)
+		LD TestCases[i].Id
+		GT 0
+		AND ( TestCases[i].state
+			EQ ut_SETUP
+		)
+		AND runCmd.Q
+		JMPCN ODK_SKIP_000000000000003_000000000000001
+
+			(* then - Stmts *)
+
+(**     		TestCases[i].state := ut_RUNNING; **)
+			(* assign - Stmt *)
+			LD ut_RUNNING
+			ST TestCases[i].state
+
+			JMP ODK_END_IF_000000000000003
+
+(**     	END_IF; **)
+		(* if - End *) 
+		ODK_SKIP_000000000000003_000000000000001:
+		ODK_END_IF_000000000000003:
+
+(**     	 **)
+(**     	{*Reset the test if the test exists and its ut_PASSED or ut_FAILED*} **)
+(**     	IF TestCases[i].id > 0 AND TestCases[i].state > ut_RUNNING AND resetCmd.Q THEN **)
+		(* if - Cond *)
+		LD TestCases[i].Id
+		GT 0
+		AND ( TestCases[i].state
+			GT ut_RUNNING
+		)
+		AND resetCmd.Q
+		JMPCN ODK_SKIP_000000000000004_000000000000001
+
+			(* then - Stmts *)
+
+(**     		TestCases[i].state := ut_SETUP; **)
+			(* assign - Stmt *)
+			LD ut_SETUP
+			ST TestCases[i].state
+
+			JMP ODK_END_IF_000000000000004
+
+(**     	END_IF; **)
+		(* if - End *) 
+		ODK_SKIP_000000000000004_000000000000001:
+		ODK_END_IF_000000000000004:
+
+(**     	 **)
+(**     	{*Check the states of the test cases*} **)
+(**     	IF TestCases[i].state = ut_RUNNING THEN **)
+		(* if - Cond *)
+		LD TestCases[i].state
+		EQ ut_RUNNING
+		JMPCN ODK_SKIP_000000000000005_000000000000001
+
+			(* then - Stmts *)
+
+(**     		Summary.TestsRunning := TRUE; **)
+			(* assign - Stmt *)
+			LD TRUE
+			ST Summary.TestsRunning
+
+			JMP ODK_END_IF_000000000000005
+
+(**     	END_IF; **)
+		(* if - End *) 
+		ODK_SKIP_000000000000005_000000000000001:
+		ODK_END_IF_000000000000005:
+
+(**     	IF TestCases[i].state = ut_PASSED THEN **)
+		(* if - Cond *)
+		LD TestCases[i].state
+		EQ ut_PASSED
+		JMPCN ODK_SKIP_000000000000006_000000000000001
+
+			(* then - Stmts *)
+
+(**     		Summary.TestsPassed := Summary.TestsPassed + 1; **)
+			(* assign - Stmt *)
+			LD Summary.TestsPassed
+			ADD 1
+			ST Summary.TestsPassed
+
+			JMP ODK_END_IF_000000000000006
+
+(**     	END_IF; **)
+		(* if - End *) 
+		ODK_SKIP_000000000000006_000000000000001:
+		ODK_END_IF_000000000000006:
+
+(**     	IF TestCases[i].state = ut_FAILED THEN **)
+		(* if - Cond *)
+		LD TestCases[i].state
+		EQ ut_FAILED
+		JMPCN ODK_SKIP_000000000000007_000000000000001
+
+			(* then - Stmts *)
+
+(**     		Summary.TestsFailed := Summary.TestsFailed + 1; **)
+			(* assign - Stmt *)
+			LD Summary.TestsFailed
+			ADD 1
+			ST Summary.TestsFailed
+
+			JMP ODK_END_IF_000000000000007
+
+(**     	END_IF; **)
+		(* if - End *) 
+		ODK_SKIP_000000000000007_000000000000001:
+		ODK_END_IF_000000000000007:
+
+	(* for - By *)
+	LD 1
+	ADD i
+	ST i
+(**     END_FOR; **)
+
+	JMP ODK_FOR_000000000000001
+
+	(* for - End *) 
+	ODK_END_FOR_000000000000001:
+
+(**  **)
+(**     {*Error if number of tests defined is 0*} **)
+(**     IF Summary.TotalTests = 0 THEN **)
+	(* if - Cond *)
+	LD Summary.TotalTests
+	EQ 0
+	JMPCN ODK_SKIP_000000000000008_000000000000001
+
+		(* then - Stmts *)
+
+(**     	Summary.Error := ut_NO_TEST_CASES_DEFINED; **)
+		(* assign - Stmt *)
+		LD ut_NO_TEST_CASES_DEFINED
+		ST Summary.Error
+
+(**     	RETURN; **)
+		(* return - Stmt *)
+		RET 
+
+		JMP ODK_END_IF_000000000000008
+
+(**     END_IF; **)
+	(* if - End *) 
+	ODK_SKIP_000000000000008_000000000000001:
+	ODK_END_IF_000000000000008:
+
+(**  **)
+(**     {*Calculate the pass rate if all tests have finished*} **)
+(**     IF NOT Summary.TestsRunning THEN **)
+	(* if - Cond *)
+	LD Summary.TestsRunning
+	NOT
+	JMPCN ODK_SKIP_000000000000009_000000000000001
+
+		(* then - Stmts *)
+
+(**     	Summary.PassRate := (UINT_TO_REAL(Summary.TestsPassed) / UINT_TO_REAL(Summary.TotalTests)) * 100.0; **)
+		(* assign - Stmt *)
+		LD Summary.TestsPassed
+		UINT_TO_REAL 
+		DIV ( Summary.TotalTests
+			UINT_TO_REAL 
+		)
+		MUL 100.0
+		ST Summary.PassRate
+
+		JMP ODK_END_IF_000000000000009
+
+(**     ELSE **)
+	(* else *) 
+	ODK_SKIP_000000000000009_000000000000001:
+
+		(* else - Stmts *)
+
+(**     	Summary.PassRate := 0.0; **)
+		(* assign - Stmt *)
+		LD 0.0
+		ST Summary.PassRate
+
+(**     END_IF; **)
+	(* if - End *) 
+	ODK_END_IF_000000000000009:
+
+
+END_FUNCTION_BLOCK
