@@ -1,8 +1,0 @@
-FUNCTION assertTrue : BOOL 
-
- VAR_INPUT
-  condition : BOOL ;
-  END_VAR 
-
-
-END_FUNCTION
